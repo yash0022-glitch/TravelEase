@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelEase - Hotels</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #6366f1; --secondary: #8b5cf6;
+    --bg: #060d1a; --card: #111827; --border: #1f2937;
+    --text: #e5e7eb; --muted: #9ca3af; --accent: #38bdf8; --gold: #f59e0b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+
+  /* BUBBLES */
+  .bubbles { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; overflow:hidden; }
+  .bubbles span { position:absolute; border-radius:50%; background:radial-gradient(circle,rgba(99,102,241,0.15),transparent 70%); animation:float 20s infinite ease-in-out; }
+  .bubbles span:nth-child(1){ width:500px; height:500px; top:-150px; left:-100px; }
+  .bubbles span:nth-child(2){ width:300px; height:300px; top:50%; right:-50px; animation-delay:5s; }
+  .bubbles span:nth-child(3){ width:200px; height:200px; bottom:100px; left:30%; animation-delay:10s; }
+  @keyframes float{ 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-30px) scale(1.05)} }
+
+  /* NAVBAR */
+  header { position:sticky; top:0; z-index:100; background:rgba(6,13,26,0.85); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); }
+  .navbar { max-width:1200px; margin:0 auto; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
+  .logo { font-family:'Playfair Display',serif; font-size:26px; display:inline-block; background:linear-gradient(135deg,#6366f1,#8b5cf6); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+  .nav-links { list-style:none; display:flex; gap:28px; align-items:center; }
+  .nav-links a { color:var(--muted); text-decoration:none; font-size:14px; font-weight:500; transition:color 0.2s; }
+  .nav-links a:hover { color:white; }
+
+  /* HERO */
+  .hero { position:relative; z-index:1; padding:72px 24px 52px; text-align:center; background:linear-gradient(180deg,rgba(99,102,241,0.08) 0%,transparent 100%); }
+  .hero h2 { font-family:'Playfair Display',serif; font-size:clamp(32px,5vw,56px); line-height:1.2; display:inline-block; background:linear-gradient(135deg,#fff 0%,#a5b4fc 100%); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent; color:transparent; margin-bottom:14px; }
+  .hero p { color:var(--muted); font-size:16px; margin-bottom:36px; }
+
+  /* SEARCH */
+  .search-panel { max-width:860px; margin:0 auto 60px; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:24px; display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; }
+  .search-group { flex:1; min-width:140px; display:flex; flex-direction:column; gap:6px; }
+  .search-group label { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); }
+  .search-group input, .search-group select { background:#1f2937; border:1px solid var(--border); color:white; padding:11px 14px; border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.2s; }
+  .search-group input:focus, .search-group select:focus { border-color:var(--primary); }
+  .search-group select option { background:#1f2937; }
+  .btn-search { padding:12px 32px; border-radius:10px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white; font-weight:600; font-size:14px; cursor:pointer; transition:transform 0.2s,box-shadow 0.2s; white-space:nowrap; }
+  .btn-search:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(99,102,241,0.4); }
+
+  /* FILTERS */
+  .filters-bar { max-width:1200px; margin:0 auto 30px; padding:0 24px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .filter-label { font-size:12px; color:var(--muted); margin-right:4px; }
+  .filter-chip { padding:7px 16px; border-radius:20px; font-size:12px; font-weight:500; border:1px solid var(--border); background:var(--card); color:var(--muted); cursor:pointer; transition:all 0.2s; }
+  .filter-chip.active, .filter-chip:hover { background:var(--primary); color:white; border-color:var(--primary); }
+  .sort-select { margin-left:auto; background:var(--card); border:1px solid var(--border); color:var(--text); padding:7px 14px; border-radius:10px; font-size:12px; font-family:'DM Sans',sans-serif; outline:none; cursor:pointer; }
+
+  /* RESULTS */
+  .results-header { max-width:1200px; margin:0 auto 20px; padding:0 24px; display:flex; justify-content:space-between; align-items:center; }
+  .results-header span { color:var(--muted); font-size:13px; }
+  #resultCount { color:white; font-weight:600; }
+
+  /* GRID */
+  .hotel-grid { max-width:1200px; margin:0 auto; padding:0 24px 80px; display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:24px; }
+  .hotel-card { background:var(--card); border-radius:18px; overflow:hidden; border:1px solid var(--border); transition:transform 0.3s,box-shadow 0.3s; cursor:pointer; position:relative; }
+  .hotel-card:hover { transform:translateY(-6px); box-shadow:0 20px 50px rgba(0,0,0,0.4); }
+  .hotel-img { position:relative; height:200px; overflow:hidden; }
+  .hotel-img img { width:100%; height:100%; object-fit:cover; transition:transform 0.4s; }
+  .hotel-card:hover .hotel-img img { transform:scale(1.06); }
+  .badge { position:absolute; top:12px; left:12px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; backdrop-filter:blur(8px); }
+  .badge.luxury { background:rgba(245,158,11,0.85); color:#1a0a00; }
+  .badge.deal   { background:rgba(99,102,241,0.85); color:white; }
+  .badge.popular{ background:rgba(16,185,129,0.85); color:white; }
+  .wishlist-btn { position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%; background:rgba(0,0,0,0.5); border:none; color:white; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; backdrop-filter:blur(8px); }
+  .wishlist-btn:hover { background:rgba(239,68,68,0.7); }
+  .wishlist-btn.active { background:rgba(239,68,68,0.9); }
+  .hotel-info { padding:18px; }
+  .hotel-name { font-family:'Playfair Display',serif; font-size:18px; margin-bottom:6px; }
+  .hotel-location { color:var(--muted); font-size:12px; display:flex; align-items:center; gap:4px; margin-bottom:12px; }
+  .hotel-amenities { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .amenity { background:#1f2937; color:var(--muted); font-size:11px; padding:4px 10px; border-radius:20px; }
+  .hotel-footer { display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border); padding-top:14px; }
+  .price-block .per-night { color:var(--muted); font-size:11px; }
+  .price-block .price { font-size:22px; font-weight:700; color:white; }
+  .price-block .price span { font-size:13px; font-weight:400; color:var(--muted); }
+  .rating { display:flex; align-items:center; gap:6px; }
+  .stars { color:var(--gold); font-size:13px; }
+  .rating-score { background:var(--primary); color:white; padding:4px 10px; border-radius:8px; font-size:13px; font-weight:700; }
+  .btn-book { padding:10px 20px; border-radius:10px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white; font-weight:600; font-size:13px; cursor:pointer; transition:box-shadow 0.2s,transform 0.2s; }
+  .btn-book:hover { box-shadow:0 6px 18px rgba(99,102,241,0.4); transform:translateY(-1px); }
+
+  /* ===== MODAL ===== */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:500; align-items:center; justify-content:center; backdrop-filter:blur(6px); padding:20px; }
+  .modal-overlay.show { display:flex; }
+  .modal { background:var(--card); border-radius:22px; max-width:580px; width:100%; border:1px solid var(--border); overflow:hidden; animation:slideUp 0.3s ease; position:relative; max-height:90vh; overflow-y:auto; }
+  @keyframes slideUp{ from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal > img { width:100%; height:200px; object-fit:cover; }
+  .modal-body { padding:24px; }
+  .modal-title { font-family:'Playfair Display',serif; font-size:22px; margin-bottom:6px; }
+  .modal-loc { color:var(--muted); font-size:13px; margin-bottom:12px; }
+  .modal-desc { font-size:13px; color:var(--muted); margin-bottom:14px; line-height:1.6; }
+  .modal-amenities { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .modal-close { position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.6); border:none; color:white; width:34px; height:34px; border-radius:50%; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; }
+
+  /* BOOKING FORM inside modal */
+  .booking-form { border-top:1px solid var(--border); padding-top:18px; margin-top:4px; }
+  .booking-form h4 { font-size:15px; margin-bottom:14px; color:var(--accent); }
+  .form-row { display:flex; gap:12px; margin-bottom:12px; }
+  .form-group { flex:1; display:flex; flex-direction:column; gap:5px; }
+  .form-group label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+  .form-group input { background:#1f2937; border:1px solid var(--border); color:white; padding:10px 12px; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; outline:none; width:100%; transition:border-color 0.2s; }
+  .form-group input:focus { border-color:var(--primary); }
+  .price-summary { background:#0b1220; border-radius:12px; padding:14px 16px; margin:16px 0; display:flex; justify-content:space-between; align-items:center; }
+  .price-summary .label { color:var(--muted); font-size:13px; }
+  .price-summary .total { font-size:22px; font-weight:700; color:white; }
+  .btn-confirm { width:100%; padding:14px; border-radius:12px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white; font-weight:700; font-size:15px; cursor:pointer; transition:box-shadow 0.2s,transform 0.2s; margin-top:4px; }
+  .btn-confirm:hover { box-shadow:0 8px 24px rgba(99,102,241,0.45); transform:translateY(-1px); }
+  .btn-confirm:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+  /* SKELETON */
+  .loading-grid { max-width:1200px; margin:0 auto; padding:0 24px 80px; display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:24px; }
+  .skeleton { background:var(--card); border-radius:18px; overflow:hidden; border:1px solid var(--border); }
+  .skeleton-img { height:200px; background:linear-gradient(90deg,#1f2937 25%,#2d3748 50%,#1f2937 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; }
+  .skeleton-body { padding:18px; display:flex; flex-direction:column; gap:10px; }
+  .skeleton-line { height:14px; border-radius:6px; background:linear-gradient(90deg,#1f2937 25%,#2d3748 50%,#1f2937 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; }
+  .skeleton-line.short { width:60%; }
+  @keyframes shimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  .no-results { grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--muted); font-size:15px; }
+  .no-results .icon { font-size:48px; margin-bottom:12px; }
+  footer { background:var(--card); border-top:1px solid var(--border); text-align:center; padding:24px; color:var(--muted); font-size:13px; }
+
+  @media(max-width:600px){
+    .hotel-grid { grid-template-columns:1fr; }
+    .search-panel { flex-direction:column; }
+    .btn-search { width:100%; }
+    .form-row { flex-direction:column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bubbles"><span></span><span></span><span></span></div>
+
+<header>
+  <nav class="navbar">
+    <h1 class="logo">TravelEase</h1>
+    <ul class="nav-links">
+      <li><a href="home.html">Home</a></li>
+      <li><a href="destination.html">Destinations</a></li>
+      <li><a href="flight.html">Flight</a></li>
+      <li><a href="hotels.html" style="color:white">Hotels</a></li>
+      <li><a href="chat.html">Chat</a></li>
+      <li id="authBtn"></li>
+    </ul>
+  </nav>
+</header>
+
+<section class="hero">
+  <h2>Find Your Perfect Stay</h2>
+  <p>Premium hotels, budget stays, and everything in between — across India.</p>
+  <div class="search-panel">
+    <div class="search-group">
+      <label>City / Destination</label>
+      <input id="searchCity" placeholder="e.g. Dehradun, Goa..." list="citySuggestions">
+      <datalist id="citySuggestions">
+        <option value="Dehradun"><option value="Delhi"><option value="Jaipur">
+        <option value="Kerala"><option value="Goa"><option value="Manali">
+        <option value="Shimla"><option value="Rishikesh"><option value="Mumbai">
+      </datalist>
+    </div>
+    <div class="search-group">
+      <label>Check In</label>
+      <input id="checkIn" type="date">
+    </div>
+    <div class="search-group">
+      <label>Check Out</label>
+      <input id="checkOut" type="date">
+    </div>
+    <div class="search-group" style="max-width:100px">
+      <label>Guests</label>
+      <select id="guests">
+        <option>1</option><option selected>2</option><option>3</option><option>4</option><option>5+</option>
+      </select>
+    </div>
+    <button class="btn-search" onclick="searchHotels()">🔍 Search</button>
+  </div>
+</section>
+
+<div class="filters-bar">
+  <span class="filter-label">Filter:</span>
+  <span class="filter-chip active" onclick="filterHotels('all',this)">All</span>
+  <span class="filter-chip" onclick="filterHotels('luxury',this)">Luxury</span>
+  <span class="filter-chip" onclick="filterHotels('budget',this)">Budget</span>
+  <span class="filter-chip" onclick="filterHotels('resort',this)">Resort</span>
+  <span class="filter-chip" onclick="filterHotels('heritage',this)">Heritage</span>
+  <span class="filter-chip" onclick="filterHotels('pool',this)">With Pool</span>
+  <select class="sort-select" onchange="sortHotels(this.value)">
+    <option value="recommended">Sort: Recommended</option>
+    <option value="price_low">Price: Low to High</option>
+    <option value="price_high">Price: High to Low</option>
+    <option value="rating">Top Rated</option>
+  </select>
+</div>
+
+<div class="results-header">
+  <span><span id="resultCount">0</span> hotels found</span>
+  <span id="searchSummary" style="color:var(--accent);font-size:13px"></span>
+</div>
+
+<div class="loading-grid" id="loadingGrid">
+  <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div></div></div>
+  <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div></div></div>
+  <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div></div></div>
+</div>
+
+<div class="hotel-grid" id="hotelGrid" style="display:none"></div>
+
+<!-- ===== HOTEL DETAIL + BOOKING MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeBgClick(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    <img id="mImg" src="" alt="">
+    <div class="modal-body">
+      <div class="modal-title" id="mName"></div>
+      <div class="modal-loc"   id="mLoc"></div>
+      <div class="modal-desc"  id="mDesc"></div>
+      <div class="modal-amenities" id="mAmenities"></div>
+
+      <!-- BOOKING FORM -->
+      <div class="booking-form">
+        <h4>📋 Guest Details</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input id="guestName" placeholder="Your full name">
+          </div>
+          <div class="form-group">
+            <label>Mobile</label>
+            <input id="guestMobile" placeholder="10-digit mobile">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input id="guestEmail" type="email" placeholder="your@email.com">
+          </div>
+        </div>
+
+        <!-- PRICE SUMMARY -->
+        <div class="price-summary">
+          <div>
+            <div class="label" id="nightsLabel">Nights</div>
+            <div style="font-size:12px;color:var(--accent)" id="dateRange"></div>
+          </div>
+          <div class="total" id="totalPrice">₹0</div>
+        </div>
+
+        <button class="btn-confirm" id="btnConfirm" onclick="confirmBooking()">
+          Confirm & Get Invoice →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>© 2026 TravelEase. All rights reserved.</footer>
+
+<script>
+// ── AUTH ──
+function loadAuth(){
+  const token = localStorage.getItem("token");
+  const btn   = document.getElementById("authBtn");
+  btn.innerHTML = token
+    ? `<a href="#" onclick="logout()">Logout</a>`
+    : `<a href="login.html">Login</a>`;
+}
+function logout(){ localStorage.removeItem("token"); location.reload(); }
+
+// ── HOTEL DATA ──
+const allHotels = [
+  { id:1, name:"The Himalayan Grand",    city:"Dehradun", location:"Mussoorie Road, Dehradun",       type:"luxury",  img:"https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",  price:8500,  rating:4.8, amenities:["Pool","Spa","Free WiFi","Restaurant","Gym"],             badge:"luxury",  desc:"Perched in the Shivalik hills with panoramic Himalayan views. A 5-star retreat featuring spa, infinity pool, and world-class cuisine.", pool:true  },
+  { id:2, name:"Zostel Rishikesh",       city:"Rishikesh", location:"Laxman Jhula, Rishikesh",       type:"budget",  img:"https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&q=80",  price:1200,  rating:4.5, amenities:["Free WiFi","Yoga Hall","River View","Kitchen"],          badge:"popular", desc:"Vibrant riverside hostel perfect for backpackers. Wake up to Ganga views and join yoga sessions at sunrise.", pool:false },
+  { id:3, name:"Taj Lake Palace",        city:"Jaipur",    location:"City Lake, Jaipur",              type:"heritage",img:"https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80",  price:22000, rating:4.9, amenities:["Pool","Heritage Tour","Fine Dining","Butler","Spa"],     badge:"luxury",  desc:"A 300-year-old palace hotel floating on Lake Pichola. Royal suites, heritage corridors, and impeccable Rajasthani hospitality.", pool:true  },
+  { id:4, name:"Kumarakom Lake Resort",  city:"Kerala",    location:"Kumarakom, Kerala",              type:"resort",  img:"https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&q=80",  price:14000, rating:4.7, amenities:["Pool","Backwaters","Ayurveda","Boat Rides","Restaurant"], badge:"deal",    desc:"Nestled on the banks of Vembanad Lake. Overwater villas, authentic Ayurvedic treatments, and Kerala cuisine at its finest.", pool:true  },
+  { id:5, name:"Apple Country Resort",   city:"Manali",    location:"Old Manali Road, Himachal Pradesh",type:"resort",img:"https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=600&q=80",price:5500,  rating:4.6, amenities:["Bonfire","Mountain View","Trekking","Free Breakfast","Spa"],badge:"popular",desc:"Surrounded by apple orchards and cedar forests. Perfect base for Rohtang adventures with cozy mountain vibes.", pool:false },
+  { id:6, name:"WelcomHeritage Connaught",city:"Delhi",    location:"Connaught Place, New Delhi",     type:"heritage",img:"https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=600&q=80",  price:9800,  rating:4.5, amenities:["Pool","Restaurant","Bar","Gym","Business Center"],       badge:"luxury",  desc:"Colonial-era architecture meets modern luxury in the heart of Delhi. Minutes from Rajpath and India Gate.", pool:true  },
+  { id:7, name:"Zostel Goa",             city:"Goa",       location:"Anjuna Beach, North Goa",        type:"budget",  img:"https://proxy.cdn.zostel.com/zostel/gallery/images/H-U2EsB7Tkmly6RJyNZJXw/zostel-goa-morjim-20230208042144.jpg?format=jpg",  price:900,   rating:4.3, amenities:["Beach Access","Free WiFi","Pool","Bar","Rooftop"],       badge:"deal",    desc:"Right on Anjuna Beach. Party, chill, or simply watch the sunset. The ultimate backpacker hangout in Goa.", pool:true  },
+  { id:8, name:"Snow Valley Resort",     city:"Shimla",    location:"Kufri, Shimla",                  type:"resort",  img:"https://images.unsplash.com/photo-1549294413-26f195200c16?w=600&q=80",  price:7200,  rating:4.4, amenities:["Snow Activities","Fireplace","Mountain View","Restaurant","Hot Tub"],badge:"popular",desc:"Ski, hike, or simply curl up by the fireplace with mountain views. Snow-capped peaks right at your doorstep.", pool:false },
+  { id:9, name:"Treehouse Hideaway",     city:"Rishikesh", location:"Forest Zone, Rishikesh",         type:"resort",  img:"https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=600&q=80",  price:4800,  rating:4.7, amenities:["Treehouse","Jungle View","Yoga","Free Breakfast","Bonfire"],badge:"popular",desc:"Sleep in the canopy! Luxury treehouses nestled in the jungle, just 5km from Rishikesh. Wildlife and serenity combined.", pool:false },
+];
+
+let displayedHotels = [...allHotels];
+let activeFilter = 'all', activeSort = 'recommended';
+let currentHotel = null, wishlist = new Set();
+
+// ── INIT ──
+window.onload = () => {
+  loadAuth();
+  const today    = new Date();
+  const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
+  const dayAfter = new Date(today); dayAfter.setDate(dayAfter.getDate()+2);
+  document.getElementById('checkIn').value  = tomorrow.toISOString().split('T')[0];
+  document.getElementById('checkOut').value = dayAfter.toISOString().split('T')[0];
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('city')) document.getElementById('searchCity').value = params.get('city');
+  setTimeout(()=>{
+    document.getElementById('loadingGrid').style.display='none';
+    document.getElementById('hotelGrid').style.display='grid';
+    renderHotels(displayedHotels);
+  }, 1200);
+};
+
+// ── SEARCH ──
+function searchHotels(){
+  const city    = document.getElementById('searchCity').value.trim().toLowerCase();
+  const checkIn = document.getElementById('checkIn').value;
+  const checkOut= document.getElementById('checkOut').value;
+  if(checkIn && checkOut && checkIn >= checkOut){ alert("Check-out must be after check-in!"); return; }
+  document.getElementById('loadingGrid').style.display='grid';
+  document.getElementById('hotelGrid').style.display='none';
+  setTimeout(()=>{
+    let r = [...allHotels];
+    if(city) r = r.filter(h=>h.city.toLowerCase().includes(city)||h.location.toLowerCase().includes(city));
+    if(activeFilter!=='all') r = applyFilter(r, activeFilter);
+    applySort(r, activeSort);
+    displayedHotels = r;
+    document.getElementById('loadingGrid').style.display='none';
+    document.getElementById('hotelGrid').style.display='grid';
+    const nights = checkIn&&checkOut ? Math.max(1,(new Date(checkOut)-new Date(checkIn))/(864e5)) : null;
+    document.getElementById('searchSummary').textContent = city
+      ? `Results for "${document.getElementById('searchCity').value}"` + (nights?` • ${nights} night${nights>1?'s':''}` : '')
+      : '';
+    renderHotels(displayedHotels, nights);
+  }, 800);
+}
+
+function applyFilter(h,f){ if(f==='all') return h; if(f==='pool') return h.filter(x=>x.pool); return h.filter(x=>x.type===f); }
+function filterHotels(f,el){
+  activeFilter=f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  let r=[...allHotels];
+  const city=document.getElementById('searchCity').value.trim().toLowerCase();
+  if(city) r=r.filter(h=>h.city.toLowerCase().includes(city)||h.location.toLowerCase().includes(city));
+  r=applyFilter(r,f); applySort(r,activeSort); displayedHotels=r; renderHotels(r);
+}
+function applySort(h,s){ if(s==='price_low') h.sort((a,b)=>a.price-b.price); else if(s==='price_high') h.sort((a,b)=>b.price-a.price); else if(s==='rating') h.sort((a,b)=>b.rating-a.rating); }
+function sortHotels(v){ activeSort=v; applySort(displayedHotels,v); renderHotels(displayedHotels); }
+
+// ── RENDER ──
+function renderHotels(hotels, nights=1){
+  const grid = document.getElementById('hotelGrid');
+  document.getElementById('resultCount').textContent = hotels.length;
+  if(!hotels.length){ grid.innerHTML=`<div class="no-results"><div class="icon">🏨</div><p>No hotels found.<br>Try a different city or remove filters.</p></div>`; return; }
+  grid.innerHTML = hotels.map(h=>{
+    const stars = '★'.repeat(Math.floor(h.rating))+(h.rating%1?'½':'');
+    const amen  = h.amenities.slice(0,3).map(a=>`<span class="amenity">${a}</span>`).join('');
+    const badge = `<span class="badge ${h.badge}">${h.badge==='luxury'?'👑 Luxury':h.badge==='deal'?'🔥 Deal':'⭐ Popular'}</span>`;
+    const total = nights>1?`<span style="font-size:12px;color:var(--accent);display:block">₹${(h.price*nights).toLocaleString()} total</span>`:'';
+    const wl    = wishlist.has(h.id);
+    return `
+    <div class="hotel-card" onclick="openModal(${h.id})">
+      <div class="hotel-img">
+        <img src="${h.img}" alt="${h.name}" loading="lazy">
+        ${badge}
+        <button class="wishlist-btn ${wl?'active':''}" onclick="toggleWishlist(event,${h.id})">${wl?'❤️':'🤍'}</button>
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-name">${h.name}</div>
+        <div class="hotel-location">📍 ${h.location}</div>
+        <div class="hotel-amenities">${amen}${h.amenities.length>3?`<span class="amenity">+${h.amenities.length-3} more</span>`:''}</div>
+        <div class="hotel-footer">
+          <div class="price-block">
+            <div class="per-night">Per night</div>
+            <div class="price">₹${h.price.toLocaleString()} <span>/ night</span></div>
+            ${total}
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+            <div class="rating"><span class="stars">${stars}</span><span class="rating-score">${h.rating}</span></div>
+            <button class="btn-book" onclick="event.stopPropagation();openModal(${h.id})">View →</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleWishlist(e,id){ e.stopPropagation(); if(wishlist.has(id)) wishlist.delete(id); else wishlist.add(id); renderHotels(displayedHotels); }
+
+// ── MODAL ──
+function openModal(id){
+  const h = allHotels.find(x=>x.id===id);
+  if(!h) return;
+  currentHotel = h;
+
+  document.getElementById('mImg').src             = h.img;
+  document.getElementById('mName').textContent    = h.name;
+  document.getElementById('mLoc').textContent     = '📍 '+h.location;
+  document.getElementById('mDesc').textContent    = h.desc;
+  document.getElementById('mAmenities').innerHTML = h.amenities.map(a=>`<span class="amenity" style="font-size:12px">${a}</span>`).join('');
+
+  // Price summary
+  const checkIn  = document.getElementById('checkIn').value;
+  const checkOut = document.getElementById('checkOut').value;
+  const nights   = checkIn&&checkOut ? Math.max(1,(new Date(checkOut)-new Date(checkIn))/(864e5)) : 1;
+  const total    = h.price * nights;
+
+  document.getElementById('nightsLabel').textContent = `${nights} night${nights>1?'s':''} × ₹${h.price.toLocaleString()}`;
+  document.getElementById('dateRange').textContent   = checkIn&&checkOut ? `${checkIn}  →  ${checkOut}` : 'Select dates above';
+  document.getElementById('totalPrice').textContent  = `₹${total.toLocaleString()}`;
+
+  // Clear form
+  ['guestName','guestMobile','guestEmail'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('btnConfirm').disabled = false;
+  document.getElementById('btnConfirm').textContent = 'Confirm & Get Invoice →';
+
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeBgClick(e){ if(e.target===document.getElementById('modalOverlay')) closeModalBtn(); }
+function closeModalBtn(){ document.getElementById('modalOverlay').classList.remove('show'); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModalBtn(); });
+
+// ── CONFIRM BOOKING + INVOICE ──
+async function confirmBooking(){
+  // Login check
+  const token = localStorage.getItem("token");
+  if(!token){
+    closeModalBtn();
+    window.location.href = "login.html?redirect=hotels";
+    return;
+  }
+
+  // Validate
+  const name   = document.getElementById('guestName').value.trim();
+  const mobile = document.getElementById('guestMobile').value.trim();
+  const email  = document.getElementById('guestEmail').value.trim();
+  if(!name)                         { alert("Please enter guest name");   return; }
+  if(!/^\d{10}$/.test(mobile))      { alert("Enter valid 10-digit mobile"); return; }
+  if(!email || !email.includes('@')) { alert("Enter valid email");         return; }
+
+  const checkIn  = document.getElementById('checkIn').value;
+  const checkOut = document.getElementById('checkOut').value;
+  if(!checkIn || !checkOut){ alert("Please select check-in and check-out dates!"); return; }
+
+  const nights = Math.max(1,(new Date(checkOut)-new Date(checkIn))/(864e5));
+  const total  = currentHotel.price * nights;
+  const guests = document.getElementById('guests').value;
+
+  const btn = document.getElementById('btnConfirm');
+  btn.disabled     = true;
+  btn.textContent  = 'Booking...';
+
+  try {
+    const res  = await fetch("/book-hotel", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token
+      },
+      body: JSON.stringify({
+        hotelId:    currentHotel.id,
+        hotelName:  currentHotel.name,
+        checkIn, checkOut, guests,
+        price: total,
+        passengers: [{ name, mobile, email }]
+      })
+    });
+
+    const data = await res.json();
+
+    if(data.success){
+      btn.textContent = '✅ Booked!';
+      // Open PDF invoice in new tab
+      window.open(`/hotel-ticket/${data.bookingId}`, '_blank');
+      setTimeout(()=>{ closeModalBtn(); btn.disabled=false; btn.textContent='Confirm & Get Invoice →'; }, 2000);
+    } else {
+      alert("Booking failed. Please try again.");
+      btn.disabled=false; btn.textContent='Confirm & Get Invoice →';
+    }
+
+  } catch(err){
+    alert("Server error. Please try again.");
+    btn.disabled=false; btn.textContent='Confirm & Get Invoice →';
+  }
+}
+</script>
+</body>
+</html>

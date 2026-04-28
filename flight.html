@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TravelEase - Flight Booking</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"DM Sans",sans-serif;background:#080d18;color:white;min-height:100vh;}
+
+/* ── TOP NAV ── */
+.topnav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 32px;
+  background:rgba(11,18,34,0.95);
+  border-bottom:1px solid rgba(56,189,248,0.12);
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(12px);
+}
+.logo{
+  font-family:"Orbitron",sans-serif;
+  font-size:18px;letter-spacing:2px;
+  color:#38bdf8;
+  display:flex;align-items:center;gap:8px;
+}
+
+/* ── SEARCH BAR ── */
+.search-bar{
+  background:linear-gradient(135deg,#0f1f3d 0%,#0c1628 100%);
+  padding:20px 32px;
+  border-bottom:1px solid rgba(56,189,248,0.08);
+}
+.search-bar h2{
+  font-family:"Orbitron",sans-serif;
+  font-size:14px;letter-spacing:2px;color:#38bdf8;
+  margin-bottom:14px;
+}
+.search-row{
+  display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;
+}
+.search-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px;}
+.search-field label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#64748b;}
+.search-field input,.search-field select{
+  padding:10px 14px;
+  background:rgba(56,189,248,0.06);
+  border:1px solid rgba(56,189,248,0.18);
+  border-radius:10px;color:#fff;
+  font-family:"DM Sans",sans-serif;font-size:14px;
+  outline:none;transition:border 0.2s;
+}
+.search-field input:focus,.search-field select:focus{border-color:#38bdf8;}
+.search-field input::placeholder{color:#334155;}
+.search-field select option{background:#0d1627;color:#fff;}
+.btn-search{
+  padding:10px 24px;
+  background:linear-gradient(135deg,#38bdf8,#0284c7);
+  color:#080d18;border:none;border-radius:10px;
+  font-family:"DM Sans",sans-serif;font-weight:700;font-size:14px;
+  cursor:pointer;white-space:nowrap;align-self:flex-end;
+  height:42px;
+}
+.btn-search:hover{opacity:0.85;}
+
+/* ── HERO STRIP ── */
+.hero-strip{
+  background:rgba(8,13,24,0.6);
+  padding:16px 32px 14px;
+  border-bottom:1px solid rgba(56,189,248,0.06);
+}
+.route-display{
+  display:flex;align-items:center;gap:12px;
+  font-family:"Orbitron",sans-serif;
+  font-size:20px;color:#fff;
+  margin-bottom:6px;
+}
+.route-display .arrow{color:#38bdf8;font-size:18px;}
+.hero-strip p{color:#64748b;font-size:13px;margin-bottom:12px;}
+
+.sort-row{
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+}
+.sort-btn{
+  padding:6px 14px;border-radius:20px;border:1px solid #1e293b;
+  background:transparent;color:#64748b;font-size:12px;cursor:pointer;
+  transition:all 0.2s;font-family:"DM Sans",sans-serif;
+}
+.sort-btn.active,.sort-btn:hover{
+  background:#38bdf8;color:#080d18;border-color:#38bdf8;font-weight:600;
+}
+
+/* ── FLIGHT CARD ── */
+.cards-wrap{padding:20px 32px;display:flex;flex-direction:column;gap:14px;}
+
+.flight-card{
+  background:linear-gradient(135deg,#0d1627 0%,#0f1e35 100%);
+  border:1px solid rgba(56,189,248,0.1);
+  border-radius:16px;padding:0;
+  display:flex;overflow:hidden;
+  transition:all 0.3s;
+}
+.flight-card:hover{
+  border-color:rgba(56,189,248,0.35);
+  transform:translateY(-2px);
+  box-shadow:0 12px 40px rgba(56,189,248,0.08);
+}
+.flight-card.economy .card-accent{background:linear-gradient(180deg,#0284c7,#0369a1);}
+.flight-card.business .card-accent{background:linear-gradient(180deg,#7c3aed,#6d28d9);}
+.flight-card.premium .card-accent{background:linear-gradient(180deg,#b45309,#92400e);}
+.card-accent{width:5px;flex-shrink:0;}
+
+.card-body{flex:1;padding:18px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.airline-logo{
+  width:50px;height:50px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+}
+.flight-main{flex:1;min-width:260px;}
+.airline-name{
+  font-size:11px;text-transform:uppercase;letter-spacing:2px;
+  color:#64748b;margin-bottom:10px;
+  display:flex;align-items:center;gap:8px;
+}
+.airline-name .badge{
+  padding:2px 8px;border-radius:4px;font-size:10px;
+  background:rgba(56,189,248,0.1);color:#38bdf8;letter-spacing:1px;font-weight:600;
+}
+.airline-name .badge.biz{background:rgba(124,58,237,0.15);color:#a78bfa;}
+.airline-name .badge.prem{background:rgba(180,83,9,0.15);color:#f59e0b;}
+
+.route-row{display:flex;align-items:center;gap:14px;}
+.city{font-family:"Orbitron",sans-serif;font-size:22px;font-weight:800;color:#fff;line-height:1;}
+.city-name{font-size:11px;color:#64748b;margin-top:3px;}
+.route-mid{flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.route-line{
+  width:100%;height:1px;
+  background:linear-gradient(90deg,transparent,#38bdf8,transparent);
+  position:relative;
+}
+.route-line::after{
+  content:"✈";position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  background:#080d18;padding:0 6px;font-size:14px;color:#38bdf8;
+}
+.duration-label{font-size:11px;color:#38bdf8;font-weight:600;}
+.stops-label{font-size:10px;color:#64748b;}
+.extras-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.extra-tag{
+  font-size:11px;padding:3px 9px;border-radius:6px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  color:#94a3b8;display:flex;align-items:center;gap:4px;
+}
+
+.card-right{
+  padding:18px 20px;background:rgba(0,0,0,0.2);
+  border-left:1px solid rgba(56,189,248,0.08);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;min-width:150px;text-align:center;
+}
+.price-label{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1px;}
+.price{font-family:"Orbitron",sans-serif;font-size:22px;font-weight:800;color:#fff;}
+.price-per{font-size:10px;color:#64748b;}
+.seats-left{font-size:11px;color:#f59e0b;background:rgba(245,158,11,0.08);padding:3px 10px;border-radius:6px;}
+.btn-book{
+  padding:10px 18px;
+  background:linear-gradient(135deg,#38bdf8,#0284c7);
+  color:#080d18;border:none;border-radius:10px;
+  font-family:"DM Sans",sans-serif;font-weight:700;font-size:13px;cursor:pointer;
+  width:100%;transition:opacity 0.2s;
+}
+.btn-book:hover{opacity:0.85;}
+.btn-chat{
+  padding:7px 18px;background:rgba(34,197,94,0.1);color:#22c55e;
+  border:1px solid rgba(34,197,94,0.3);border-radius:10px;
+  font-family:"DM Sans",sans-serif;font-weight:600;font-size:12px;cursor:pointer;
+  width:100%;transition:all 0.2s;
+}
+.btn-chat:hover{background:rgba(34,197,94,0.2);}
+
+/* ── BOOKING SECTION ── */
+#bookingSection{
+  display:none;width:92%;margin:24px auto;
+  background:#0d1627;border:1px solid rgba(56,189,248,0.12);
+  border-radius:16px;overflow:hidden;flex-direction:row;
+}
+.left-panel{width:22%;padding:20px;background:#080d18;border-right:1px solid rgba(56,189,248,0.08);}
+.left-panel h3{font-size:13px;text-transform:uppercase;letter-spacing:2px;color:#38bdf8;margin-bottom:16px;}
+.seat-area{width:38%;padding:20px;overflow-x:auto;}
+.right-panel{width:40%;padding:20px;background:#080d18;}
+.right-panel h3{font-size:13px;text-transform:uppercase;letter-spacing:2px;color:#38bdf8;margin-bottom:16px;}
+
+/* ── SEAT MAP ── */
+.plane-nose{width:100%;text-align:center;font-size:40px;margin-bottom:8px;opacity:0.6;}
+.cabin-label{
+  font-size:10px;text-transform:uppercase;letter-spacing:2px;
+  color:#38bdf8;text-align:center;margin:10px 0 6px;
+  padding:4px;background:rgba(56,189,248,0.06);border-radius:4px;
+}
+.seat-legend{display:flex;gap:14px;margin-bottom:14px;font-size:11px;align-items:center;flex-wrap:wrap;}
+.legend-dot{width:13px;height:13px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:middle;}
+.plane-layout{display:inline-block;min-width:200px;}
+.plane-row{display:flex;align-items:center;margin-bottom:5px;}
+.row-num{font-size:9px;color:#334155;width:16px;text-align:center;margin-right:4px;flex-shrink:0;}
+.aisle{width:16px;flex-shrink:0;}
+.seat{
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  margin:2px;border-radius:5px 5px 8px 8px;cursor:pointer;
+  font-size:9px;font-weight:700;border-bottom:3px solid rgba(0,0,0,0.3);
+  transition:transform 0.15s;
+}
+.seat:active{transform:scale(0.9);}
+.available{background:#22c55e;color:#fff;}
+.available:hover{background:#16a34a;}
+.booked{background:#1e293b;color:#334155;cursor:not-allowed;}
+.selected{background:#f59e0b;color:#111;}
+.business-seat.available{background:#7c3aed;}
+.business-seat.selected{background:#f59e0b;}
+.premium-seat.available{background:#b45309;}
+.premium-seat.selected{background:#f59e0b;}
+
+/* ── FORM ── */
+input,select{
+  width:100%;padding:10px 12px;margin:6px 0;
+  border-radius:8px;border:1px solid rgba(56,189,248,0.1);
+  background:#0d1627;color:white;
+  font-family:"DM Sans",sans-serif;font-size:13px;
+  outline:none;transition:border 0.2s;
+}
+input:focus,select:focus{border-color:#38bdf8;}
+input::placeholder{color:#334155;}
+.passenger-box{
+  background:#0f1e35;padding:12px;border-radius:10px;
+  margin-top:10px;border:1px solid rgba(56,189,248,0.08);
+}
+.passenger-box p{font-size:12px;color:#38bdf8;margin-bottom:8px;}
+button.proc-btn{
+  margin-top:12px;padding:11px;width:100%;
+  background:linear-gradient(135deg,#38bdf8,#0284c7);
+  color:#080d18;border:none;border-radius:10px;
+  font-family:"DM Sans",sans-serif;font-weight:700;font-size:14px;cursor:pointer;
+}
+button.otp-btn{
+  margin-top:8px;padding:10px;width:100%;
+  background:#1e293b;color:#38bdf8;
+  border:1px solid rgba(56,189,248,0.2);border-radius:10px;
+  font-family:"DM Sans",sans-serif;font-weight:600;font-size:13px;cursor:pointer;
+}
+#otpSection{display:none;margin-top:12px;}
+#otpSection h3{font-size:13px;text-transform:uppercase;letter-spacing:2px;color:#38bdf8;margin-bottom:10px;}
+
+/* ── SPIN MODAL ── */
+#spinOverlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);
+  z-index:999;align-items:center;justify-content:center;
+}
+#spinOverlay.active{display:flex;}
+#spinModal{
+  background:#0d1627;border-radius:20px;padding:28px 32px;
+  text-align:center;width:380px;
+  box-shadow:0 0 60px rgba(56,189,248,0.15);
+  border:1px solid rgba(56,189,248,0.15);
+}
+#spinModal h2{font-family:"Orbitron",sans-serif;margin:0 0 4px;font-size:20px;color:#38bdf8;letter-spacing:1px;}
+#spinModal p{color:#64748b;font-size:13px;margin:0 0 16px;}
+.spin-meta{display:flex;justify-content:center;gap:24px;margin-bottom:16px;font-size:13px;color:#64748b;}
+.spin-meta b{color:#fff;}
+.wheel-wrap{position:relative;width:230px;height:230px;margin:0 auto 16px;}
+#spinCanvas{border-radius:50%;box-shadow:0 0 30px rgba(56,189,248,0.2);}
+.wheel-pointer{
+  position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  font-size:26px;filter:drop-shadow(0 2px 6px rgba(56,189,248,0.5));
+}
+#spinResultBox{
+  padding:10px 18px;border-radius:10px;font-size:14px;font-weight:600;
+  background:#0f1e35;color:#64748b;margin-bottom:14px;min-height:44px;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(56,189,248,0.08);
+}
+#spinResultBox.win{background:#052e16;color:#4ade80;border-color:rgba(74,222,128,0.2);}
+#paySpinArea{display:none;margin-bottom:12px;}
+#paySpinArea p{font-size:13px;color:#64748b;margin:0 0 8px;}
+.pay-chips{display:flex;justify-content:center;gap:8px;}
+.pay-chip{
+  padding:5px 14px;border:1px solid #1e293b;border-radius:20px;
+  cursor:pointer;font-size:12px;color:#64748b;background:transparent;transition:all 0.2s;
+}
+.pay-chip.active{background:#38bdf8;color:#080d18;border-color:#38bdf8;font-weight:600;}
+#btnSpin{
+  padding:10px 28px;background:linear-gradient(135deg,#38bdf8,#0284c7);
+  color:#080d18;border:none;border-radius:10px;
+  font-family:"Orbitron",sans-serif;font-size:14px;font-weight:700;cursor:pointer;
+  letter-spacing:1px;transition:opacity 0.2s;
+}
+#btnSpin:disabled{opacity:0.35;cursor:not-allowed;}
+#btnSkipSpin{
+  display:block;margin:10px auto 0;background:transparent;color:#334155;
+  border:none;font-size:12px;cursor:pointer;text-decoration:underline;
+  font-family:"DM Sans",sans-serif;
+}
+.disc-pill{
+  display:inline-block;padding:2px 10px;
+  background:#052e16;color:#4ade80;border-radius:20px;
+  font-size:11px;font-weight:600;margin-left:6px;
+}
+
+/* No results */
+.no-results{text-align:center;padding:60px 20px;color:#334155;}
+.no-results .icon{font-size:56px;margin-bottom:12px;}
+.no-results h2{font-size:20px;color:#64748b;margin-bottom:8px;}
+
+/* Loading */
+.loading{text-align:center;padding:60px;color:#38bdf8;}
+.loading::after{
+  content:"";display:inline-block;width:32px;height:32px;border-radius:50%;
+  border:3px solid rgba(56,189,248,0.2);border-top-color:#38bdf8;
+  animation:spin 0.8s linear infinite;margin-left:12px;vertical-align:middle;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:768px){
+  .cards-wrap{padding:12px;}
+  .search-row{flex-direction:column;}
+  .search-field{min-width:100%;}
+  #bookingSection{flex-direction:column;}
+  .left-panel,.seat-area,.right-panel{width:100%;border:none;border-bottom:1px solid rgba(56,189,248,0.08);}
+  .city{font-size:16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <div class="logo"><span>✈</span> TravelEase <span style="font-size:11px;color:#334155;font-family:'DM Sans';font-weight:400;letter-spacing:1px;">FLIGHTS</span></div>
+  <div style="display:flex;gap:12px;">
+    <a href="home.html" style="color:#64748b;font-size:13px;text-decoration:none;"> Home</a>
+    <a href="destination.html" style="color:#64748b;font-size:13px;text-decoration:none;">Destinations</a></li>
+    <a href="hotel.html"  style="color:#64748b;font-size:13px;text-decoration:none;"">Hotel</a></li>
+    <a href="chat.html"  style="color:#64748b;font-size:13px;text-decoration:none;"">Chat</a>
+    <span id="authBtn" style="color:#38bdf8;font-size:13px;cursor:pointer;" onclick="goLogin()">Login</span>
+  </div>
+</div>
+
+<!-- SEARCH BAR -->
+<div class="search-bar">
+  <h2>✈ Search Flights</h2>
+  <div class="search-row">
+    <div class="search-field">
+      <label>From</label>
+      <select id="searchFrom">
+        <option>Delhi</option><option>Mumbai</option><option>Bangalore</option>
+        <option>Goa</option><option>Hyderabad</option><option>Chennai</option>
+        <option>Kolkata</option><option>Jaipur</option><option>Pune</option>
+        <option>Dehradun</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:flex-end;padding-bottom:2px;">
+      <button onclick="swapCities()" style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);color:#38bdf8;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:16px;">⇄</button>
+    </div>
+    <div class="search-field">
+      <label>To</label>
+      <select id="searchTo">
+        <option>Mumbai</option><option>Delhi</option><option>Bangalore</option>
+        <option>Goa</option><option>Hyderabad</option><option>Chennai</option>
+        <option>Kolkata</option><option>Jaipur</option><option>Pune</option>
+        <option>Dehradun</option>
+      </select>
+    </div>
+    <div class="search-field" style="max-width:160px;">
+      <label>Date</label>
+      <input type="date" id="searchDate">
+    </div>
+    <div class="search-field" style="max-width:100px;">
+      <label>Passengers</label>
+      <select id="searchPass">
+        <option value="1">1</option><option value="2">2</option>
+        <option value="3">3</option><option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+    <button class="btn-search" onclick="doSearch()">Search Flights</button>
+  </div>
+</div>
+
+<!-- HERO STRIP -->
+<div class="hero-strip">
+  <div class="route-display">
+    <span id="fromShow">—</span>
+    <span class="arrow">✈</span>
+    <span id="toShow">—</span>
+    <span style="font-size:13px;color:#64748b;font-family:'DM Sans';margin-left:8px;" id="dateShow"></span>
+  </div>
+  <p>Best fares guaranteed · Free cancellation on select flights</p>
+  <div class="sort-row">
+    <button class="sort-btn active" onclick="sortFlights('price',this)">💰 Cheapest</button>
+    <button class="sort-btn" onclick="sortFlights('duration',this)">⚡ Shortest</button>
+    <button class="sort-btn" onclick="sortFlights('departure',this)">🌅 Earliest</button>
+    <button class="sort-btn" onclick="filterClass('Economy',this)">Economy</button>
+    <button class="sort-btn" onclick="filterClass('Business',this)">Business</button>
+    <button class="sort-btn" onclick="filterClass('Premium Economy',this)">Premium</button>
+    <span style="font-size:12px;color:#64748b;margin-left:6px;" id="resultCount"></span>
+  </div>
+</div>
+
+<!-- FLIGHT CARDS -->
+<div class="cards-wrap" id="flightCards">
+  <div class="loading">Searching flights</div>
+</div>
+
+<!-- BOOKING SECTION -->
+<div id="bookingSection">
+  <div class="left-panel">
+    <h3>✈ Seat Map</h3>
+    <p style="font-size:12px;color:#334155;line-height:1.6;">Click a seat to select.</p>
+    <div style="margin-top:16px;">
+      <div id="selectedSeatInfo" style="font-size:13px;color:#94a3b8;"></div>
+    </div>
+  </div>
+  <div class="seat-area" id="seats"></div>
+  <div class="right-panel">
+    <h3>Passenger Info</h3>
+    <input id="mobile" placeholder="Mobile Number">
+    <input id="email" placeholder="Email Address">
+    <div id="passengerSection"></div>
+    <div id="otpSection">
+      <h3>Verify OTP</h3>
+      <input id="otpInput" placeholder="Enter 4-digit OTP">
+      <button class="otp-btn" onclick="verifyOtp()">✓ Verify & Confirm</button>
+    </div>
+    <button class="proc-btn" onclick="sendOtp()">Proceed to Book →</button>
+  </div>
+</div>
+
+<!-- SPIN MODAL -->
+<div id="spinOverlay">
+  <div id="spinModal">
+    <h2>✈ SPIN & WIN</h2>
+    <p>2 free spins — then ₹50/spin. Try your luck!</p>
+    <div class="spin-meta">
+      <span>Free spins: <b id="smFree">2</b></span>
+      <span>Paid spins: <b id="smPaid">0</b></span>
+    </div>
+    <div class="wheel-wrap">
+      <div class="wheel-pointer">▼</div>
+      <canvas id="spinCanvas" width="230" height="230"></canvas>
+    </div>
+    <div id="spinResultBox">Spin to unlock your discount!</div>
+    <div id="paySpinArea">
+      <p>Pay ₹50 to spin again</p>
+      <div class="pay-chips">
+        <div class="pay-chip active">UPI</div>
+        <div class="pay-chip">Card</div>
+        <div class="pay-chip">Wallet</div>
+      </div>
+      <button onclick="payAndSpin()" style="margin-top:10px;background:linear-gradient(135deg,#38bdf8,#0284c7);color:#080d18;border:none;border-radius:10px;padding:9px 24px;font-weight:700;cursor:pointer;font-size:14px;font-family:'DM Sans';">Pay ₹50 & Spin</button>
+    </div>
+    <button id="btnSpin" onclick="doSpin()">Spin Free!</button>
+    <button id="btnSkipSpin" onclick="closeSpinModal()">Skip, book at full price</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//   URL PARAMS & SEARCH INIT
+// ══════════════════════════════════════
+const params = new URLSearchParams(window.location.search);
+
+let currentFrom = params.get("from") || "Delhi";
+let currentTo   = params.get("to")   || "Mumbai";
+let currentDate = params.get("date") || getTodayDateStr();
+let currentPass = params.get("pass") || "1";
+
+function getTodayDateStr() {
+  const d = new Date();
+  return d.toISOString().split('T')[0];
+}
+
+// Set search bar defaults
+window.addEventListener('DOMContentLoaded', () => {
+  setSelectValue('searchFrom', currentFrom);
+  setSelectValue('searchTo', currentTo);
+  document.getElementById('searchDate').value = currentDate;
+  document.getElementById('searchPass').value = currentPass;
+  updateHeroDisplay();
+  loadFlights();
+  updateAuthBtn();
+});
+
+function setSelectValue(id, val) {
+  const sel = document.getElementById(id);
+  for (let opt of sel.options) {
+    if (opt.value.toLowerCase() === val.toLowerCase()) {
+      sel.value = opt.value;
+      return;
+    }
+  }
+  // If not found, add it
+  const opt = document.createElement('option');
+  opt.value = val; opt.textContent = val;
+  sel.appendChild(opt);
+  sel.value = val;
+}
+
+function updateHeroDisplay() {
+  document.getElementById('fromShow').textContent = currentFrom;
+  document.getElementById('toShow').textContent   = currentTo;
+  document.getElementById('dateShow').textContent = currentDate ? `📅 ${currentDate}` : '';
+}
+
+function swapCities() {
+  const f = document.getElementById('searchFrom').value;
+  const t = document.getElementById('searchTo').value;
+  setSelectValue('searchFrom', t);
+  setSelectValue('searchTo', f);
+}
+
+function doSearch() {
+  const f = document.getElementById('searchFrom').value;
+  const t = document.getElementById('searchTo').value;
+  const d = document.getElementById('searchDate').value;
+  const p = document.getElementById('searchPass').value;
+
+  if (f === t) { alert("From aur To same nahi ho sakte!"); return; }
+  if (!d) { alert("Please select a date"); return; }
+
+  currentFrom = f;
+  currentTo   = t;
+  currentDate = d;
+  currentPass = p;
+
+  // Update URL without page reload
+  const url = new URL(window.location);
+  url.searchParams.set('from', f);
+  url.searchParams.set('to', t);
+  url.searchParams.set('date', d);
+  url.searchParams.set('pass', p);
+  window.history.pushState({}, '', url);
+
+  updateHeroDisplay();
+  loadFlights();
+  // Close booking section if open
+  document.getElementById('bookingSection').style.display = 'none';
+}
+
+function updateAuthBtn() {
+  const token = localStorage.getItem("token");
+  const btn   = document.getElementById("authBtn");
+  if (token) {
+    btn.textContent = "Logout";
+    btn.onclick = () => { localStorage.removeItem("token"); location.reload(); };
+  } else {
+    btn.textContent = "Login";
+    btn.onclick = goLogin;
+  }
+}
+
+function goLogin() {
+  const q = new URLSearchParams({ redirect:"flights", from:currentFrom, to:currentTo, date:currentDate });
+  window.location.href = "login.html?" + q.toString();
+}
+
+/* ── AIRLINE ICONS ── */
+const airlineIcons = {
+  "IndiGo":"💙","Air India":"🔴","SpiceJet":"🟠","Vistara":"🟣",
+  "GoFirst":"🟢","Akasa Air":"🟡","Air Asia":"❤️"
+};
+
+let allFlights = [];
+
+// ══════════════════════════════════════
+//   LOAD FLIGHTS — KEY FIX HERE
+// ══════════════════════════════════════
+async function loadFlights() {
+  const box = document.getElementById("flightCards");
+  box.innerHTML = '<div class="loading">Searching flights</div>';
+  document.getElementById('resultCount').textContent = '';
+
+  try {
+    // Send from & to; server now ignores date for filtering (flights run daily)
+    const url = `/flights?from=${encodeURIComponent(currentFrom)}&to=${encodeURIComponent(currentTo)}&date=${encodeURIComponent(currentDate)}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    allFlights  = data;
+    renderFlights(data);
+  } catch(e) {
+    box.innerHTML = `<div class="no-results"><div class="icon">⚠️</div><h2>Could not load flights</h2><p>Please check connection or try again.</p></div>`;
+  }
+}
+
+function sortFlights(by, btn) {
+  document.querySelectorAll(".sort-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  let sorted = [...allFlights];
+  if (by === 'price')     sorted.sort((a,b) => a.price - b.price);
+  if (by === 'duration')  sorted.sort((a,b) => a.durationMins - b.durationMins);
+  if (by === 'departure') sorted.sort((a,b) => a.departure.localeCompare(b.departure));
+  renderFlights(sorted);
+}
+
+function filterClass(cls, btn) {
+  document.querySelectorAll(".sort-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderFlights(allFlights.filter(f => f.class === cls));
+}
+
+function renderFlights(data) {
+  const box = document.getElementById("flightCards");
+  document.getElementById('resultCount').textContent = data.length ? `${data.length} flights found` : '';
+
+  if (!data.length) {
+    box.innerHTML = `
+      <div class="no-results">
+        <div class="icon">✈️</div>
+        <h2>No flights found</h2>
+        <p style="color:#334155">${currentFrom} → ${currentTo} ke liye koi flight nahi mili.<br>Dusra route ya date try karo.</p>
+      </div>`;
+    return;
+  }
+
+  let html = "";
+  data.forEach(f => {
+    const icon      = airlineIcons[f.airline] || "✈️";
+    const cardClass = f.class === "Business" ? "business" : f.class === "Premium Economy" ? "premium" : "economy";
+    const badgeCls  = f.class === "Business" ? "biz" : f.class === "Premium Economy" ? "prem" : "";
+    const hrs       = Math.floor(f.durationMins/60);
+    const mins      = f.durationMins % 60;
+    const duration  = hrs + "h " + (mins ? mins+"m" : "");
+    const stops     = f.stops === 0 ? "Non-stop" : f.stops + " stop" + (f.stops>1?"s":"");
+
+    html += `
+    <div class="flight-card ${cardClass}">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="airline-logo">${icon}</div>
+        <div class="flight-main">
+          <div class="airline-name">
+            ${f.airline} · ${f.flightNo}
+            <span class="badge ${badgeCls}">${f.class}</span>
+          </div>
+          <div class="route-row">
+            <div>
+              <div class="city">${f.from}</div>
+              <div class="city-name">${f.departure}</div>
+            </div>
+            <div class="route-mid">
+              <div class="route-line"></div>
+              <div class="duration-label">${duration}</div>
+              <div class="stops-label">${stops}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="city">${f.to}</div>
+              <div class="city-name">${f.arrival}</div>
+            </div>
+          </div>
+          <div class="extras-row">
+            <div class="extra-tag">🧳 ${f.baggage}</div>
+            <div class="extra-tag">🍽️ ${f.meal}</div>
+            ${f.refundable ? '<div class="extra-tag">✅ Refundable</div>' : '<div class="extra-tag">❌ Non-refundable</div>'}
+            ${f.wifi ? '<div class="extra-tag">📶 WiFi</div>' : ""}
+          </div>
+        </div>
+      </div>
+      <div class="card-right">
+        <div class="price-label">per person</div>
+        <div class="price" id="priceDisplay-${f.id}">₹${f.price.toLocaleString()}</div>
+        <div class="price-per">incl. taxes</div>
+        <div class="seats-left">🔥 ${f.availableSeats} seats left</div>
+        <button class="btn-book" onclick="handleBooking(${f.id},${f.price})">Book Now</button>
+        <button class="btn-chat" onclick="openChat(${f.id},'${encodeURIComponent(f.airline+" "+f.flightNo)}')">💬 Chat</button>
+      </div>
+    </div>`;
+  });
+  box.innerHTML = html;
+}
+
+// ══════════════════════════════════════
+//   BOOKING
+// ══════════════════════════════════════
+let currentFlightId  = null;
+let currentBasePrice = 0;
+let appliedDisc      = 0;
+
+function handleBooking(id, price) {
+  if (!localStorage.getItem("token")) {
+    const q = new URLSearchParams({ redirect:"flights", from:currentFrom, to:currentTo, date:currentDate });
+    window.location.href = "login.html?" + q.toString();
+    return;
+  }
+  currentFlightId  = id;
+  currentBasePrice = price;
+  appliedDisc      = 0;
+  openSpinModal();
+}
+
+// ── SEAT MAP ──
+let selected = [];
+
+async function openSeat(id) {
+  currentFlightId = id;
+  selected = [];
+  document.getElementById("bookingSection").style.display = "flex";
+  document.getElementById("bookingSection").scrollIntoView({behavior:"smooth"});
+
+  const res   = await fetch(`/flight-seats/${id}`);
+  const seats = await res.json();
+  const box   = document.getElementById("seats");
+  box.innerHTML = "";
+
+  const legend = document.createElement("div");
+  legend.className = "seat-legend";
+  legend.innerHTML = `
+    <span><span class="legend-dot" style="background:#22c55e"></span>Economy</span>
+    <span><span class="legend-dot" style="background:#7c3aed"></span>Business</span>
+    <span><span class="legend-dot" style="background:#f59e0b"></span>Selected</span>
+    <span><span class="legend-dot" style="background:#1e293b"></span>Booked</span>`;
+  box.appendChild(legend);
+
+  const nose = document.createElement("div");
+  nose.className = "plane-nose";
+  nose.textContent = "✈";
+  box.appendChild(nose);
+
+  const layout     = document.createElement("div");
+  layout.className = "plane-layout";
+
+  const seatsPerRow = 6;
+  const totalRows   = Math.ceil(seats.length / seatsPerRow);
+  const bizRows     = 3;
+
+  for (let row = 0; row < totalRows; row++) {
+    if (row === 0) {
+      const lbl = document.createElement("div");
+      lbl.className = "cabin-label";
+      lbl.textContent = "✦ Business Class ✦";
+      layout.appendChild(lbl);
+    }
+    if (row === bizRows) {
+      const lbl = document.createElement("div");
+      lbl.className = "cabin-label";
+      lbl.textContent = "Economy Class";
+      layout.appendChild(lbl);
+    }
+
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "plane-row";
+    const rowNum = document.createElement("div");
+    rowNum.className = "row-num";
+    rowNum.textContent = row + 1;
+    rowDiv.appendChild(rowNum);
+
+    const cols = ["A","B","C","D","E","F"];
+    for (let col = 0; col < seatsPerRow; col++) {
+      if (col === 3) {
+        const aisle = document.createElement("div");
+        aisle.className = "aisle";
+        rowDiv.appendChild(aisle);
+      }
+      const seatIdx = row * seatsPerRow + col;
+      if (seatIdx >= seats.length) break;
+      const s = seats[seatIdx];
+      const d = document.createElement("div");
+      const isBiz = row < bizRows;
+      d.className = "seat " + (s.booked ? "booked" : "available") + (isBiz ? " business-seat" : "");
+      d.innerText = cols[col];
+      d.title     = `Seat ${row+1}${cols[col]}`;
+      if (!s.booked) {
+        d.onclick = () => {
+          const seatId = (row+1) + cols[col];
+          if (d.classList.contains("selected")) {
+            d.classList.remove("selected");
+            d.classList.add("available");
+            selected = selected.filter(x => x !== seatId);
+          } else {
+            d.classList.remove("available");
+            d.classList.add("selected");
+            selected.push(seatId);
+          }
+          updatePassengerUI();
+          document.getElementById("selectedSeatInfo").innerHTML =
+            selected.length ? `<b style="color:#38bdf8">${selected.length}</b> seat(s):<br>${selected.join(", ")}` : "";
+        };
+      }
+      rowDiv.appendChild(d);
+    }
+    layout.appendChild(rowDiv);
+  }
+  box.appendChild(layout);
+}
+
+function updatePassengerUI() {
+  const c = document.getElementById("passengerSection");
+  if (!selected.length) { c.innerHTML = ""; return; }
+  c.innerHTML = `
+  <div class="passenger-box">
+    <p>Selected: ${selected.join(", ")}</p>
+    <input id="pName" placeholder="Full Name">
+    <input id="pAge" type="number" placeholder="Age">
+    <select id="pGender"><option>Male</option><option>Female</option><option>Other</option></select>
+    <input id="pPassport" placeholder="Passport / PAN Number">
+  </div>`;
+}
+
+// ── OTP ──
+let userMobile = "";
+
+async function sendOtp() {
+  userMobile = document.getElementById("mobile").value;
+  const email = document.getElementById("email").value;
+  if (!userMobile) { alert("Please enter mobile number"); return; }
+  if (!email || !email.includes("@")) { alert("Please enter a valid email"); return; }
+  if (!selected.length) { alert("Please select at least one seat"); return; }
+  await fetch("/send-otp", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({ mobile: userMobile })
+  });
+  document.getElementById("otpSection").style.display = "block";
+  alert("OTP sent! Check server terminal.");
+}
+
+async function verifyOtp() {
+  const otp = document.getElementById("otpInput").value;
+  const res  = await fetch("/verify-otp", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({ mobile: userMobile, otp })
+  });
+  const data = await res.json();
+  if (!data.success) { alert("Wrong OTP"); return; }
+
+  await fetch("/book-flight", {
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":localStorage.getItem("token")},
+    body:JSON.stringify({ flightId: currentFlightId, seats: selected })
+  });
+
+  const confirmRes = await fetch("/confirm-flight", {
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":localStorage.getItem("token")},
+    body:JSON.stringify({
+      flightId: currentFlightId,
+      seats: selected,
+      email: document.getElementById("email").value,
+      date: currentDate,
+      passengers: [{
+        name:     document.getElementById("pName")?.value || "",
+        age:      document.getElementById("pAge")?.value || "",
+        gender:   document.getElementById("pGender")?.value || "",
+        passport: document.getElementById("pPassport")?.value || ""
+      }],
+      discount: appliedDisc
+    })
+  });
+  const data2 = await confirmRes.json();
+  localStorage.setItem("flightBookingId_" + currentFlightId, data2.bookingId);
+  alert("✅ Flight Booked! Booking ID: " + data2.bookingId);
+  window.open(`/flight-ticket/${data2.bookingId}`);
+  location.reload();
+}
+
+// ── CHAT ──
+function openChat(flightId, nameEncoded) {
+  const token     = localStorage.getItem("token");
+  const bookingId = localStorage.getItem("flightBookingId_" + flightId);
+  if (!token) { alert("Please login first!"); window.location.href = "login.html"; return; }
+  if (!bookingId) { alert("Chat is only available for confirmed ticket holders."); return; }
+  window.location.href = `chat.html?busId=${flightId}&busName=${nameEncoded}&bookingId=${bookingId}`;
+}
+
+// ══════════════════════════════════════
+//   SPIN WHEEL
+// ══════════════════════════════════════
+const SEGMENTS = [
+  { label:"5% Off",    color:"#0284c7", disc:5,  real:true  },
+  { label:"80% Off",   color:"#dc2626", disc:80, real:false },
+  { label:"10% Off",   color:"#0891b2", disc:10, real:true  },
+  { label:"Try Again", color:"#1e293b", disc:0,  real:true  },
+  { label:"15% Off",   color:"#7c3aed", disc:15, real:true  },
+  { label:"60% Off",   color:"#be123c", disc:60, real:false },
+  { label:"Free Meal", color:"#b45309", disc:0,  real:true, snack:true },
+  { label:"5% Off",    color:"#0d9488", disc:5,  real:true  },
+];
+
+let freeSpins  = 2;
+let paidSpins  = 0;
+let wheelAngle = 0;
+let spinning   = false;
+
+const canvas = document.getElementById("spinCanvas");
+const ctx    = canvas.getContext("2d");
+const N      = SEGMENTS.length;
+const ARC    = (2 * Math.PI) / N;
+
+function drawWheel(angle) {
+  ctx.clearRect(0, 0, 230, 230);
+  const cx = 115, cy = 115, r = 112;
+  for (let i = 0; i < N; i++) {
+    const start = angle + i * ARC;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, start + ARC);
+    ctx.closePath();
+    ctx.fillStyle = SEGMENTS[i].color;
+    ctx.fill();
+    ctx.strokeStyle = "#080d18";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + ARC / 2);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 11px 'DM Sans', sans-serif";
+    ctx.fillText(SEGMENTS[i].label, r - 8, 4);
+    ctx.restore();
+  }
+  ctx.beginPath();
+  ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
+  ctx.fillStyle = "#080d18";
+  ctx.fill();
+  ctx.strokeStyle = "#38bdf8";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function openSpinModal() {
+  document.getElementById("spinOverlay").classList.add("active");
+  drawWheel(wheelAngle);
+  updateSpinUI();
+}
+
+function closeSpinModal() {
+  document.getElementById("spinOverlay").classList.remove("active");
+  openSeat(currentFlightId);
+}
+
+function getRiggedIndex() {
+  const realOnes = SEGMENTS.map((s,i) => s.real ? i : -1).filter(i => i !== -1);
+  return realOnes[Math.floor(Math.random() * realOnes.length)];
+}
+
+function doSpin() {
+  if (spinning) return;
+  if (freeSpins <= 0) { alert("Please complete ₹50 payment to spin again!"); return; }
+  freeSpins--;
+  spinning = true;
+  document.getElementById("btnSpin").disabled = true;
+  const rb = document.getElementById("spinResultBox");
+  rb.className = "";
+  rb.textContent = "Spinning...";
+
+  const winIdx    = getRiggedIndex();
+  const fullTurns = 5 + Math.floor(Math.random() * 3);
+  const targetAng = -Math.PI / 2 - winIdx * ARC - ARC / 2;
+  const target    = targetAng - fullTurns * 2 * Math.PI;
+  const startAng  = wheelAngle;
+  const duration  = 4200;
+  const startTime = performance.now();
+
+  function animate(now) {
+    const t    = Math.min((now - startTime) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 4);
+    drawWheel(startAng + (target - startAng) * ease);
+    if (t < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      wheelAngle = targetAng % (2 * Math.PI);
+      spinning   = false;
+      showSpinResult(winIdx);
+      updateSpinUI();
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function showSpinResult(idx) {
+  const seg     = SEGMENTS[idx];
+  const rb      = document.getElementById("spinResultBox");
+  const discPct = seg.disc;
+  const saving  = Math.round(currentBasePrice * discPct / 100);
+  const newPrice = currentBasePrice - saving;
+
+  if (seg.snack) {
+    appliedDisc = 0;
+    rb.className = "win";
+    rb.textContent = "🍽️ Free in-flight meal on your journey!";
+    const pd = document.getElementById("priceDisplay-" + currentFlightId);
+    if (pd) pd.innerHTML = "₹" + currentBasePrice.toLocaleString() + '<span class="disc-pill">+ Free Meal</span>';
+  } else if (discPct > 0) {
+    appliedDisc = discPct;
+    rb.className = "win";
+    rb.textContent = `${discPct}% off! Pay ₹${newPrice.toLocaleString()} (saved ₹${saving.toLocaleString()})`;
+    const pd = document.getElementById("priceDisplay-" + currentFlightId);
+    if (pd) pd.innerHTML = "₹" + newPrice.toLocaleString() + `<span class="disc-pill">${discPct}% off</span>`;
+  } else {
+    appliedDisc = 0;
+    rb.className = "";
+    rb.textContent = "Better luck next time! Spin again.";
+  }
+}
+
+function updateSpinUI() {
+  document.getElementById("smFree").textContent = freeSpins;
+  document.getElementById("smPaid").textContent = paidSpins;
+  const btn = document.getElementById("btnSpin");
+  if (freeSpins > 0) {
+    btn.disabled    = false;
+    btn.textContent = `Spin Free! (${freeSpins} left)`;
+    document.getElementById("paySpinArea").style.display = "none";
+  } else {
+    btn.disabled    = true;
+    btn.textContent = "No free spins left";
+    document.getElementById("paySpinArea").style.display = "block";
+  }
+}
+
+async function payAndSpin() {
+  const chip = document.querySelector(".pay-chip.active");
+  const method = chip ? chip.textContent : "UPI";
+  if (!confirm(`Pay ₹50 via ${method}? (Click OK)`)) return;
+  paidSpins++;
+  freeSpins = 1;
+  document.getElementById("paySpinArea").style.display = "none";
+  updateSpinUI();
+  doSpin();
+}
+
+document.querySelectorAll(".pay-chip").forEach(c => {
+  c.addEventListener("click", () => {
+    document.querySelectorAll(".pay-chip").forEach(x => x.classList.remove("active"));
+    c.classList.add("active");
+  });
+  
+});
+</script>
+</body>
+</html>

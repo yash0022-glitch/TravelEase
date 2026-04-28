@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TravelEase Auth</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:white;
+}
+
+.container{
+  width:350px;
+  background:#111827;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 0 25px rgba(99,102,241,0.3);
+}
+
+.tabs{
+  display:flex;
+  margin-bottom:20px;
+}
+
+.tab{
+  width:50%;
+  text-align:center;
+  padding:10px;
+  cursor:pointer;
+  font-weight:bold;
+  border-bottom:2px solid transparent;
+}
+
+.active{
+  border-bottom:2px solid #6366f1;
+  color:#6366f1;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border:none;
+  border-radius:8px;
+  background:#1f2937;
+  color:white;
+  outline:none;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:white;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+small{color:#9ca3af;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="tabs">
+    <div id="loginTab" class="tab active" onclick="showLogin()">Login</div>
+    <div id="registerTab" class="tab" onclick="showRegister()">Register</div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="loginForm">
+    <input id="loginEmail" placeholder="Email">
+    <input id="loginPass" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="registerForm" style="display:none;">
+    <input id="name" placeholder="Full Name">
+    <input id="email" placeholder="Email">
+    <input id="pass" type="password" placeholder="Password (min 6 chars)">
+    <input id="cpass" type="password" placeholder="Confirm Password">
+    <small>Password must be 6+ chars and match</small>
+    <button onclick="register()">Create Account</button>
+  </div>
+
+</div>
+
+<script>
+
+function showLogin(){
+  document.getElementById("loginForm").style.display="block";
+  document.getElementById("registerForm").style.display="none";
+  document.getElementById("loginTab").classList.add("active");
+  document.getElementById("registerTab").classList.remove("active");
+}
+
+function showRegister(){
+  document.getElementById("loginForm").style.display="none";
+  document.getElementById("registerForm").style.display="block";
+  document.getElementById("registerTab").classList.add("active");
+  document.getElementById("loginTab").classList.remove("active");
+}
+
+
+/* ================= LOGIN ================= */
+async function login(){
+
+  let email = document.getElementById("loginEmail").value.trim();
+  let pass  = document.getElementById("loginPass").value.trim();
+
+  if(!email || !pass){ alert("Fill all fields"); return; }
+
+  let res  = await fetch("/login",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ email, password: pass })
+  });
+
+  let data = await res.json();
+
+  if(data.success){
+    localStorage.setItem("token", data.token);
+    alert("Login Successful ✅");
+
+    // ── URL params se redirect decide karo ──
+    const params   = new URLSearchParams(window.location.search);
+    const redirect = params.get("redirect");
+
+    if(redirect === "buses"){
+      // buses.html wala redirect — from, to, date bhi saath bhejo
+      const from = params.get("from") || "";
+      const to   = params.get("to")   || "";
+      const date = params.get("date") || "";
+      window.location.href = `buses.html?from=${from}&to=${to}&date=${date}`;
+
+    } else if(redirect === "hotels"){
+      // hotels.html wala redirect
+      window.location.href = "hotels.html";
+
+    } else {
+      // Default — koi redirect nahi tha
+      window.location.href = "home.html";
+    }
+
+  } else {
+    alert(data.message || "Login failed");
+  }
+}
+
+
+/* ================= REGISTER ================= */
+async function register(){
+
+  let name  = document.getElementById("name").value.trim();
+  let email = document.getElementById("email").value.trim();
+  let pass  = document.getElementById("pass").value.trim();
+  let cpass = document.getElementById("cpass").value.trim();
+
+  if(!name || !email || !pass || !cpass){ alert("Fill all fields"); return; }
+  if(pass.length < 6){ alert("Password too short"); return; }
+  if(pass !== cpass){ alert("Passwords do not match"); return; }
+
+  let res  = await fetch("/register",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ name, email, password: pass })
+  });
+
+  let data = await res.json();
+  alert(data.message || "Done");
+  if(data.success){ showLogin(); }
+}
+
+</script>
+
+</body>
+</html>
